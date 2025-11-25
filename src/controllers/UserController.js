@@ -4,10 +4,10 @@ const jwtService = require("../services/JwtService");
 
 const CreateUser = async (req, res) => {
     try{
-        const {name, email, password,confirmPassword, phone} = req.body
+        const { email, password,confirmPassword} = req.body
         const reg = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         const isCheckEmail=reg.test(email)
-        if(!name || !email || !password|| !confirmPassword|| !phone){
+        if( !email || !password|| !confirmPassword){
             return res.status(400).json({
                 status: 'ERR',
                 message: 'Thiếu thông tin'
@@ -49,7 +49,14 @@ const loginUser = async (req, res) => {
             })
         } 
         const result=await UserService.loginUser(req.body)
-        return res.status(200).json(result)
+        const {refresh_token, ...newResponse}=result
+        //console.log('result', result)
+        res.cookie('refresh_token', refresh_token,{
+            httpOnly:true,
+            secure:false,   
+            sameSite:'lax'
+        })
+        return res.status(200).json(newResponse)
     } catch (e) {
         return res.status(404).json({
             message: e
@@ -124,7 +131,7 @@ const getDetailsUser = async (req, res) => {
 }
 const refreshToken = async (req, res) => {
     try {
-        const tokenHeader = req.headers.token;
+        const tokenHeader = req.cookies.refresh_token;
         if (!tokenHeader) {
             return res.status(400).json({
                 status: 'ERR',
@@ -132,10 +139,30 @@ const refreshToken = async (req, res) => {
             });
         }
 
-        const token = tokenHeader.split(' ')[1];
+        const token = tokenHeader;
         const result = await jwtService.refreshTokenJwtService(token);
 
         return res.status(200).json(result);
+    } catch (e) {
+        return res.status(500).json({
+            status: 'ERR',
+            message: e.message || 'Lỗi server'
+        });
+    }
+}
+
+const logoutUser = async (req, res) => {
+    try {
+        res.clearCookie('refresh_token', {
+            httpOnly: true,
+            secure: false,
+            sameSite: 'lax',
+        });
+
+        return res.status(200).json({
+            status: 'OK',
+            message: 'Đăng xuất thành công'
+        });
     } catch (e) {
         return res.status(500).json({
             status: 'ERR',
@@ -151,5 +178,6 @@ module.exports = {
     deleteUser,
     getAllUser,
     getDetailsUser,
-    refreshToken
+    refreshToken,
+    logoutUser
 }

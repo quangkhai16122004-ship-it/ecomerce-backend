@@ -55,19 +55,19 @@ const loginUser =(userLogin)=>{
                     message: 'Mật khẩu không đúng'
                 })
             }
-            const access_tocken = await generalAccessToken({
+            const access_token = await generalAccessToken({
                 id: checkUser._id,
                 isAdmin: checkUser.isAdmin
             })
-            const refresh_tocken = await generalRefreshToken({
+            const refresh_token = await generalRefreshToken({
                 id: checkUser._id,
                 isAdmin: checkUser.isAdmin
             })
             resolve({
                 status: 'OK',
                 message: 'SUCCESS',
-                access_tocken,
-                refresh_tocken
+                access_token,
+                refresh_token
             })
         } catch (e) {
             reject(e)
