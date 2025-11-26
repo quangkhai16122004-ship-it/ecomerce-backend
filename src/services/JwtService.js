@@ -18,7 +18,7 @@ const generalRefreshToken =  async (payload) => {
 const refreshTokenJwtService =   (token) => {
     return new Promise( (resolve, reject)=>{
         try {
-             console.log('token', token)
+            // console.log('token', token)
              jwt.verify(token, process.env.REFRESH_TOKEN, async (err, user) => {
                 if (err) {
                     return resolve({
@@ -31,7 +31,7 @@ const refreshTokenJwtService =   (token) => {
                 id: user?.id,
                 isAdmin: user?.isAdmin
             })
-            console.log('access_token', access_token)
+           // console.log('access_token', access_token)
             resolve({
                 status: 'OK',
                 message: 'SUCCESS',
