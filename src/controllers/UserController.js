@@ -101,6 +101,30 @@ const deleteUser = async (req, res) => {
     }
 }
 
+const deleteManyUser = async (req, res) => {
+  try {
+    const ids = req.body.ids;
+
+    if (!ids || !Array.isArray(ids)) {
+      return res.status(400).json({
+        status: "ERR",
+        message: "Thiếu ids hoặc ids không hợp lệ"
+      });
+    }
+
+    const result = await UserService.deleteManyUser(ids);
+    return res.status(200).json(result);
+
+  } catch (e) {
+    return res.status(500).json({
+      status: "ERR",
+      message: "Lỗi server",
+      error: e
+    });
+  }
+};
+
+
 const getAllUser = async (req, res) => {
     try{
         const result=await UserService.getAllUser()
@@ -179,5 +203,6 @@ module.exports = {
     getAllUser,
     getDetailsUser,
     refreshToken,
-    logoutUser
+    logoutUser,
+    deleteManyUser
 }

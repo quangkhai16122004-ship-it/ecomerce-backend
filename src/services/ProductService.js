@@ -81,6 +81,31 @@ const deleteProduct =(id)=>{
     })
 }
 
+const deleteManyProduct = (ids) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            if (!Array.isArray(ids) || ids.length === 0) {
+                resolve({
+                    status: 'ERR',
+                    message: 'Danh sách ids không hợp lệ'
+                });
+            }
+
+            await Product.deleteMany({ _id: { $in: ids } });
+
+            resolve({
+                status: 'OK',
+                message: 'Xoá nhiều sản phẩm thành công'
+            });
+
+        } catch (e) {
+            reject(e);
+        }
+    });
+};
+
+
 const getDetailsProduct =(id)=>{
     return new Promise( async(resolve, reject)=>{
         try {
@@ -158,5 +183,6 @@ module.exports = {
     updateProduct,
     getDetailsProduct,
     deleteProduct,
-    getAllProduct
+    getAllProduct,
+    deleteManyProduct
 }
