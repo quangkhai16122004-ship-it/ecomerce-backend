@@ -99,8 +99,19 @@ const deleteMany = async (req, res) => {
 
 const getAllProduct = async (req, res) => {
     try{
-        const {limit, page, sort, filter} = req.query
-        const result=await ProductService.getAllProduct(Number(limit)||8, Number(page)||0, sort, filter)
+        const {limit, page, sort, filter, search} = req.query
+        const result=await ProductService.getAllProduct(Number(limit)||8, Number(page)||0, sort, filter, search)
+        return res.status(200).json(result)
+    } catch (e) {
+        return res.status(404).json({
+            message: e
+        })
+    }
+}
+
+const getAllType = async (req, res) => {
+    try{
+        const result = await ProductService.getAllTypee()
         return res.status(200).json(result)
     } catch (e) {
         return res.status(404).json({
@@ -114,5 +125,6 @@ module.exports = {
     getDetailsProduct,
     deleteProduct,
     getAllProduct,
-    deleteMany
+    deleteMany,
+    getAllType
 }

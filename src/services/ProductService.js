@@ -131,51 +131,80 @@ const getDetailsProduct =(id)=>{
     })
 }
 
-const getAllProduct =(limit, page, sort, filter)=>{
-    return new Promise( async(resolve, reject)=>{
+const getAllProduct = (limit, page, sort, filter, search) => {
+    return new Promise(async (resolve, reject) => {
         try {
-            const totalProduct= await Product.countDocuments()
-            if(filter){
-                const label=filter[0]
-                const allobjectFilter= await Product.find({[label] : {'$regex': filter[1]}}).limit(limit).skip(page * limit)
-                resolve({
-                    status: 'OK',
-                    message: 'SUCCESS',
-                    data: allobjectFilter,
-                    total: totalProduct,
-                    pageCurrent: Number(page + 1),  
-                    totalPage: Math.ceil(totalProduct/limit)
-                    })
+            // 1. KHỞI TẠO CÁC ĐIỀU KIỆN
+            let condition = {};
+            let sortObject = {};
+            let totalProduct;
+            
+            // --- XỬ LÝ TÌM KIẾM/LỌC (FILTER) ---
+            // Frontend gửi: filter=['name', 'giá trị'] VÀ search='giá trị'
+            if (filter && typeof filter === 'string' && search && search.trim() !== '') {
+                
+                // 'filter' là tên trường cần tìm (ví dụ: 'name')
+                // 'search' là giá trị tìm kiếm (ví dụ: 't')
+                condition = { 
+                    [filter]: { 
+                        '$regex': search, 
+                        '$options': 'i' 
+                    } 
+                };
+                
+                // Đếm tổng số sản phẩm đã filter
+                totalProduct = await Product.countDocuments(condition);
+                
+            } else {
+                // Trường hợp 2: Không có tìm kiếm hợp lệ, đếm tổng tất cả sản phẩm
+                totalProduct = await Product.countDocuments();
+            } 
+            
+            // --- XỬ LÝ SẮP XẾP (SORT) ---
+            if (sort) {
+                // sort[0] là direction (1 hoặc -1), sort[1] là field ('price', 'rating')
+                sortObject[sort[1]] = sort[0] === 'asc' ? 1 : -1;
+                // Nếu Controller gửi đúng định dạng ['asc', 'price'] hoặc ['desc', 'price']
             }
-            if(sort){
-                const objectSort={}
-                objectSort[sort[1]]=sort[0]
-                console.log('objectSort', objectSort)
-                const allProductsort= await Product.find().limit(limit).skip(page * limit).sort(objectSort)
-                resolve({
-                    status: 'OK',
-                    message: 'SUCCESS',
-                    data: allProductsort,
-                    total: totalProduct,
-                    pageCurrent: Number(page + 1),  
-                    totalPage: Math.ceil(totalProduct/limit)
-                    })
-            }
-            const allProduct= await Product.find().limit(limit).skip(page * limit)
+            
+            // --- THỰC HIỆN TRUY VẤN VÀ PHÂN TRANG ---
+            
+           const allProduct = await Product.find(condition) // Áp dụng điều kiện tìm kiếm
+                .limit(limit)
+                .skip(page * limit)
+                .sort(sortObject); // Áp dụng sắp xếp
+
+            const totalPage = Math.ceil(totalProduct / limit);
+            
             resolve({
                 status: 'OK',
                 message: 'SUCCESS',
                 data: allProduct,
-                total: totalProduct,
-                pageCurrent: Number(page + 1), 
-                totalPage: Math.ceil(totalProduct/limit)
-            })
+                total: totalProduct, // Tổng số sản phẩm sau khi filter
+                pageCurrent: Number(page) + 1,
+                totalPage: totalPage
+            });
+            
         } catch (e) {
-            reject(e)
+            reject(e);
         }
-    })
-}
+    });
+};
 
+const getAllTypee = () => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const allType = await Product.distinct('type')
+            resolve({
+                status: 'OK',
+                message: 'SUCCESS',
+                data: allType,
+            });
+        } catch (e) {
+            reject(e);
+        }
+    });
+};
 
 
 module.exports = {
@@ -184,5 +213,6 @@ module.exports = {
     getDetailsProduct,
     deleteProduct,
     getAllProduct,
-    deleteManyProduct
+    deleteManyProduct,
+    getAllTypee
 }
