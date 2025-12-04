@@ -73,7 +73,7 @@ const authUserMiddleware = (req, res, next) => {
             status: 'ERR',
         })
     }
-
+console.log('req.params.id', req.params.id)
     // ✅ KIỂM TRA ĐỊNH DẠNG TOKEN (có "Bearer " không)
     const tokenParts = req.headers.token.split(' ');
     if (tokenParts.length !== 2) {
@@ -87,12 +87,12 @@ const authUserMiddleware = (req, res, next) => {
     
     // ✅ KIỂM TRA USER ID TRONG PARAMS
     const userId = req.params.id;
-    if (!userId) {
-        return res.status(400).json({
-            message: 'User ID is required in URL parameters',
-            status: 'ERR',
-        })
-    }
+    // if (!userId) {
+    //     return res.status(400).json({
+    //         message: 'User ID is required in URL parameters',
+    //         status: 'ERR',
+    //     })
+    // }
 
     jwt.verify(token, process.env.ACCESS_TOKEN, function(err, user) {
         if (err) {
@@ -103,7 +103,7 @@ const authUserMiddleware = (req, res, next) => {
         }
 
         // ✅ KIỂM TRA QUYỀN TRUY CẬP
-        if (user?.isAdmin || user?.id === userId) {
+        if (user?.isAdmin || user?.id === req.params.id) {
             req.user = user; // Lưu thông tin user vào request
             next();
         } else {

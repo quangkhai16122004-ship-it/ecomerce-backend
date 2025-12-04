@@ -22,7 +22,6 @@ const orderSchema = new mongoose.Schema({
     paymentMethod: {type: String, require: true},
     itemsPrice: {type: Number, require: true},
     shippingPrice: {type: Number, require: true},
-    taxPrice: {type: Number, require: true},
     totalPrice: {type: Number, require: true},
     user: {type: mongoose.Schema.Types.ObjectId, ref:'User', require:true},
     isPaid: {type: Boolean, default: false},
@@ -34,5 +33,5 @@ const orderSchema = new mongoose.Schema({
     timestamps: true,
 }
 );
-const Order = mongoose.Schema('Order', orderSchema);
+const Order = mongoose.model('Order', orderSchema);
 module.exports=Order
