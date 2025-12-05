@@ -35,26 +35,32 @@ const CreateUser =(newUser)=>{
     })
 }
 
-const loginUser =(userLogin)=>{
+const loginUser = (userLogin) => {
     return new Promise( async(resolve, reject)=>{
         const { email, password} = userLogin
         try {
             const checkUser= await User.findOne({
                 email : email
             })
+            
             if(checkUser ===null){
-                resolve({
+                return resolve({
                     status: 'ERR',
-                    message: 'user không tồn tại'
+                    message: 'Tài khoản không tồn tại',
+                    type: 'EMAIL_NOT_FOUND' // Thêm trường type
                 })
             }
+            
             const comparePassword = bcrypt.compareSync(password, checkUser.password);
+            
             if(!comparePassword){
-                resolve({
+                return resolve({
                     status: 'ERR',
-                    message: 'Mật khẩu không đúng'
+                    message: 'Mật khẩu không đúng',
+                    type: 'WRONG_PASSWORD' // Thêm trường type
                 })
             }
+
             const access_token = await generalAccessToken({
                 id: checkUser._id,
                 isAdmin: checkUser.isAdmin
@@ -63,7 +69,8 @@ const loginUser =(userLogin)=>{
                 id: checkUser._id,
                 isAdmin: checkUser.isAdmin
             })
-            resolve({
+            
+            return resolve({
                 status: 'OK',
                 message: 'SUCCESS',
                 access_token,
